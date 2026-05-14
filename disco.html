@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cargando disco...</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --fondo:       #0d0d0d;
+    --fondo2:      #1a1a1a;
+    --fondo3:      #2a2a2a;
+    --borde:       #333333;
+    --texto:       #f0ebe0;
+    --texto-sub:   #8a8a8a;
+    --acento:      #c9a84c;
+    --acento-soft: rgba(201,168,76,0.12);
+    --acento-brd:  rgba(201,168,76,0.28);
+    --btn-bg:      #1a1a2e;
+    --btn-brd:     rgba(100,130,200,0.3);
+    --btn-txt:     #a8c4f0;
+    --chip-bg:     #2a2a2a;
+    --chip-brd:    #383838;
+    --chip-txt:    #8a8a8a;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --fondo:       #f5f2ed;
+      --fondo2:      #ffffff;
+      --fondo3:      #ede9e2;
+      --borde:       #ddd8cf;
+      --texto:       #1a1610;
+      --texto-sub:   #7a7068;
+      --acento:      #a07830;
+      --acento-soft: rgba(160,120,48,0.08);
+      --acento-brd:  rgba(160,120,48,0.25);
+      --btn-bg:      #e8eef8;
+      --btn-brd:     rgba(80,110,180,0.25);
+      --btn-txt:     #2a5abf;
+      --chip-bg:     #e8e4dc;
+      --chip-brd:    #d8d0c4;
+      --chip-txt:    #7a7068;
+    }
+  }
+
+  html { background: var(--fondo); }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+
+  /* ── LOADING ── */
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--fondo);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 100;
+  }
+
+  .loading-vinyl {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50%,
+      #222 0%, #222 15%,
+      #1a1a1a 16%, #111 22%,
+      #1a1a1a 23%, #111 30%,
+      #1a1a1a 31%, #111 38%,
+      #1a1a1a 39%, #111 46%,
+      #1a1a1a 47%, #111 50%
+    );
+    animation: spin 2s linear infinite;
+    box-shadow: 0 0 30px rgba(201,168,76,0.2);
+  }
+
+  .loading-texto {
+    font-size: 13px;
+    color: var(--texto-sub);
+    letter-spacing: 0.1em;
+  }
+
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* ── ERROR ── */
+  .error-screen {
+    display: none;
+    padding: 40px 24px;
+    text-align: center;
+  }
+
+  .error-icon { font-size: 48px; margin-bottom: 16px; }
+  .error-titulo { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 10px; }
+  .error-msg { font-size: 13px; color: var(--texto-sub); line-height: 1.6; }
+
+  /* ── CONTENIDO PRINCIPAL ── */
+  .main-content { display: none; }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #111;
+  }
+
+  .hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a0a00 0%, #3d1f00 35%, #1a0a00 65%, #0d0d0d 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .hero-placeholder {
+      background: linear-gradient(135deg, #2a1400 0%, #5a3000 35%, #2a1400 65%, #1a0d00 100%);
+    }
+  }
+
+  .vinyl-visual {
+    width: 74%;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50%,
+      #111 0%, #111 8%,
+      #1c1c1c 8.5%, #0d0d0d 13%,
+      #1c1c1c 13.5%, #0d0d0d 18%,
+      #1c1c1c 18.5%, #0d0d0d 23%,
+      #1c1c1c 23.5%, #0d0d0d 29%,
+      #1c1c1c 29.5%, #0d0d0d 35%,
+      #1c1c1c 35.5%, #0d0d0d 41%,
+      #1c1c1c 41.5%, #0d0d0d 47%,
+      #1c1c1c 47.5%, #0d0d0d 50%
+    );
+    box-shadow: 0 0 70px rgba(201,168,76,0.18), 0 0 140px rgba(0,0,0,0.9);
+    position: relative;
+    animation: spin 20s linear infinite;
+  }
+
+  .vinyl-label {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30%;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8B1a1a, #c0392b);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px;
+  }
+
+  .label-title { font-family: 'Playfair Display', serif; font-size: 6px; font-weight: 700; color: #f5e6c8; line-height: 1.2; }
+  .label-artist { font-size: 5px; color: rgba(245,230,200,0.7); margin-top: 2px; }
+
+  .hero-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 52%;
+    background: linear-gradient(to top, var(--fondo) 0%, transparent 100%);
+  }
+
+  /* ── CONTENIDO ── */
+  .contenido {
+    padding: 0 20px 48px;
+    margin-top: -18px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .chip-seccion {
+    display: inline-block;
+    background: var(--chip-bg);
+    border: 1px solid var(--chip-brd);
+    color: var(--chip-txt);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 4px 11px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
+  .titulo-disco {
+    font-family: 'Playfair Display', serif;
+    font-size: 33px;
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--texto);
+    margin-bottom: 5px;
+    letter-spacing: -0.02em;
+  }
+
+  .artista-nombre {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--acento);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 26px;
+  }
+
+  .sep {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, var(--acento), transparent);
+    margin: 22px 0;
+    opacity: 0.35;
+  }
+
+  .seccion-titulo {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--texto-sub);
+    margin-bottom: 14px;
+  }
+
+  /* ── FICHA TÉCNICA ── */
+  .ficha-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .ficha-item {
+    background: var(--fondo2);
+    border: 1px solid var(--borde);
+    border-radius: 11px;
+    padding: 12px 14px;
+  }
+
+  .ficha-item.full { grid-column: 1 / -1; }
+
+  .ficha-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--texto-sub);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .ficha-valor {
+    font-size: 13px;
+    color: var(--texto);
+    line-height: 1.35;
+  }
+
+  /* ── BIOGRAFÍA ── */
+  .bio-bloque {
+    background: var(--fondo2);
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    padding: 18px;
+  }
+
+  .bio-texto {
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--texto);
+    opacity: 0.88;
+  }
+
+  .bio-texto p + p { margin-top: 10px; }
+
+  /* ── DATO CURIOSO ── */
+  .dato-bloque {
+    background: var(--acento-soft);
+    border: 1px solid var(--acento-brd);
+    border-radius: 12px;
+    padding: 18px 18px 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dato-bloque::before {
+    content: '❝';
+    position: absolute;
+    top: -6px; left: 10px;
+    font-size: 52px;
+    color: var(--acento);
+    opacity: 0.12;
+    font-family: 'Playfair Display', serif;
+    line-height: 1;
+  }
+
+  .dato-texto {
+    font-size: 13px;
+    line-height: 1.72;
+    color: var(--texto);
+    font-style: italic;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── BOTONES ── */
+  .acciones { display: flex; flex-direction: column; gap: 10px; }
+
+  .spinstack-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-brd);
+    border-radius: 14px;
+    color: var(--btn-txt);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+  }
+
+  .spinstack-btn:active { opacity: 0.75; transform: scale(0.98); }
+
+  .spinstack-icon {
+    width: 22px; height: 22px;
+    background: linear-gradient(135deg, #4a7fe0, #7ab3f0);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .discogs-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    color: var(--texto-sub);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── CANCIONES ── */
+  .lado-titulo {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--acento);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .lado-titulo::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--borde);
+  }
+
+  .cancion-lista { list-style: none; margin-bottom: 18px; }
+
+  .cancion-item {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--borde);
+  }
+
+  .cancion-item:last-child { border-bottom: none; }
+
+  .cancion-num {
+    font-size: 10px;
+    color: var(--texto-sub);
+    font-weight: 500;
+    min-width: 22px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .cancion-nombre { font-size: 13px; color: var(--texto); flex: 1; }
+  .cancion-duracion { font-size: 11px; color: var(--texto-sub); flex-shrink: 0; }
+
+  /* ── PIE ── */
+  .pie {
+    text-align: center;
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--borde);
+  }
+
+  .pie-texto { font-size: 10px; color: var(--borde); letter-spacing: 0.14em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loading">
+  <div class="loading-vinyl"></div>
+  <div class="loading-texto">Cargando disco...</div>
+</div>
+
+<!-- ERROR -->
+<div class="error-screen" id="error">
+  <div class="error-icon">⚠️</div>
+  <div class="error-titulo">Disco no encontrado</div>
+  <div class="error-msg" id="error-msg">No se pudo cargar la información de este disco.</div>
+</div>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div class="main-content" id="main">
+
+  <!-- HERO -->
+  <div class="hero" id="hero">
+    <div class="hero-placeholder" id="hero-placeholder">
+      <div class="vinyl-visual">
+        <div class="vinyl-label">
+          <div class="label-title" id="label-titulo">—</div>
+          <div class="label-artist" id="label-artista">—</div>
+        </div>
+      </div>
+    </div>
+    <img class="hero-img" id="hero-img" style="display:none" alt="Portada del disco">
+    <div class="hero-overlay"></div>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div class="contenido">
+
+    <div class="chip-seccion" id="chip-genero">—</div>
+    <h1 class="titulo-disco" id="titulo-disco">—</h1>
+    <div class="artista-nombre" id="artista-nombre">—</div>
+
+    <!-- FICHA TÉCNICA -->
+    <div class="seccion-titulo">Ficha técnica</div>
+    <div class="ficha-grid">
+      <div class="ficha-item">
+        <div class="ficha-label">Año</div>
+        <div class="ficha-valor" id="f-anio">—</div>
+      </div>
+      <div class="ficha-item">
+        <div class="ficha-label">País</div>
+        <div class="ficha-valor" id="f-pais">—</div>
+      </div>
+      <div class="ficha-item">
+        <div class="ficha-label">Sello</div>
+        <div class="ficha-valor" id="f-sello">—</div>
+      </div>
+      <div class="ficha-item">
+        <div class="ficha-label">Formato</div>
+        <div class="ficha-valor" id="f-formato">—</div>
+      </div>
+      <div class="ficha-item full">
+        <div class="ficha-label">Pressing</div>
+        <div class="ficha-valor" id="f-pressing">—</div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- BIOGRAFÍA -->
+    <div id="seccion-bio" style="display:none">
+      <div class="seccion-titulo">Biografía</div>
+      <div class="bio-bloque">
+        <div class="bio-texto" id="bio-texto"></div>
+      </div>
+      <div class="sep"></div>
+    </div>
+
+    <!-- DATO CURIOSO -->
+    <div id="seccion-dato" style="display:none">
+      <div class="seccion-titulo">Dato curioso</div>
+      <div class="dato-bloque">
+        <p class="dato-texto" id="dato-texto"></p>
+      </div>
+      <div class="sep"></div>
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="seccion-titulo">Acciones</div>
+    <div class="acciones">
+      <a id="btn-spinstack" href="#" class="spinstack-btn">
+        <div class="spinstack-icon">♪</div>
+        Registrar escucha en Spinstack
+      </a>
+      <a id="btn-discogs" href="#" target="_blank" class="discogs-btn">
+        Ver en Discogs →
+      </a>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- CANCIONES -->
+    <div id="seccion-canciones">
+      <div class="seccion-titulo">Lista de canciones</div>
+      <div id="canciones-container"></div>
+    </div>
+
+    <div class="pie">
+      <div class="pie-texto">Colección · miguelherreria</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── CONFIGURACIÓN ──────────────────────────────────────────────
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSgCg_wULbvtaSSgau8IoZuIVGabPO7g73VwV6ftPhhT39MBLEpQ14G518A5IBPPqrndtP40xAjMsgS/pub?gid=1073519162&single=true&output=csv';
+const DISCOGS_API = 'https://api.discogs.com/releases/';
+const USER_AGENT = 'MiguelHerreriaVinylCollection/1.0';
+
+// ── LEER ID DE LA URL ──────────────────────────────────────────
+function getReleaseId() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('id');
+}
+
+// ── MOSTRAR ERROR ──────────────────────────────────────────────
+function mostrarError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('error').style.display = 'block';
+  document.getElementById('error-msg').textContent = msg;
+}
+
+// ── PARSEAR CSV ────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    // Manejo de campos con comas dentro de comillas
+    const vals = [];
+    let cur = '', inQ = false;
+    for (const ch of lines[i]) {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    vals.push(cur.trim());
+    const row = {};
+    headers.forEach((h, idx) => { row[h] = (vals[idx] || '').replace(/^"|"$/g, ''); });
+    rows.push(row);
+  }
+  return rows;
+}
+
+// ── CONSTRUIR CANCIONES ────────────────────────────────────────
+function buildTracklist(tracklist) {
+  if (!tracklist || tracklist.length === 0) return;
+  const container = document.getElementById('canciones-container');
+  container.innerHTML = '';
+
+  // Agrupar por posición (A, B, C, D, etc.) o sin lado
+  const sides = {};
+  let sinLado = [];
+
+  tracklist.forEach(track => {
+    if (track.type_ === 'heading') return;
+    const pos = (track.position || '').toUpperCase();
+    const sideMatch = pos.match(/^([A-Z])\d*/);
+    if (sideMatch) {
+      const side = sideMatch[1];
+      if (!sides[side]) sides[side] = [];
+      sides[side].push(track);
+    } else {
+      sinLado.push(track);
+    }
+  });
+
+  const renderLista = (tracks, label) => {
+    if (!tracks || tracks.length === 0) return;
+    const ladoEl = document.createElement('div');
+    ladoEl.className = 'lado-titulo';
+    ladoEl.textContent = label;
+    container.appendChild(ladoEl);
+
+    const ul = document.createElement('ul');
+    ul.className = 'cancion-lista';
+    tracks.forEach(track => {
+      if (!track.title) return;
+      const li = document.createElement('li');
+      li.className = 'cancion-item';
+      li.innerHTML = `
+        <span class="cancion-num">${track.position || '—'}</span>
+        <span class="cancion-nombre">${track.title}</span>
+        ${track.duration ? `<span class="cancion-duracion">${track.duration}</span>` : ''}
+      `;
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+  };
+
+  const sideKeys = Object.keys(sides).sort();
+  if (sideKeys.length > 0) {
+    const sideNames = { A: 'Lado A', B: 'Lado B', C: 'Lado C', D: 'Lado D' };
+    sideKeys.forEach(s => renderLista(sides[s], sideNames[s] || `Lado ${s}`));
+  } else {
+    renderLista(sinLado, 'Canciones');
+  }
+}
+
+// ── RENDER PÁGINA ──────────────────────────────────────────────
+function renderPagina(discogs, sheet) {
+  const id = getReleaseId();
+
+  // Título de la pestaña
+  document.title = `${discogs.artists_sort || discogs.title} — ${discogs.title}`;
+
+  // Artista y título
+  const artista = discogs.artists_sort || (discogs.artists ? discogs.artists.map(a => a.name.replace(/\s*\(\d+\)$/, '')).join(', ') : '—');
+  const titulo = discogs.title || '—';
+
+  document.getElementById('label-titulo').textContent = titulo.substring(0, 20);
+  document.getElementById('label-artista').textContent = artista.substring(0, 20);
+  document.getElementById('titulo-disco').textContent = titulo;
+  document.getElementById('artista-nombre').textContent = artista;
+
+  // Género (de sheet si existe, si no del genero de discogs)
+  const genero = sheet ? (sheet.genero || discogs.genres?.[0] || '—') : (discogs.genres?.[0] || '—');
+  document.getElementById('chip-genero').textContent = genero;
+
+  // Ficha técnica
+  document.getElementById('f-anio').textContent = discogs.year || discogs.released || '—';
+  document.getElementById('f-pais').textContent = discogs.country || '—';
+
+  const sello = discogs.labels ? discogs.labels.map(l => l.name).join(', ') : '—';
+  document.getElementById('f-sello').textContent = sello;
+
+  const formatos = discogs.formats ? discogs.formats.map(f => {
+    let str = f.name || '';
+    if (f.descriptions) str += ' — ' + f.descriptions.join(', ');
+    return str;
+  }).join(' / ') : '—';
+  document.getElementById('f-formato').textContent = formatos || '—';
+
+  // Pressing: sello + catálogo
+  const pressing = discogs.labels ? discogs.labels.map(l => {
+    let p = l.name;
+    if (l.catno && l.catno !== 'none') p += ` (${l.catno})`;
+    return p;
+  }).join(' / ') : '—';
+  document.getElementById('f-pressing').textContent = pressing;
+
+  // Portada
+  if (discogs.images && discogs.images.length > 0) {
+    const img = document.getElementById('hero-img');
+    const primaryImg = discogs.images.find(i => i.type === 'primary') || discogs.images[0];
+    img.src = primaryImg.uri;
+    img.style.display = 'block';
+    document.getElementById('hero-placeholder').style.display = 'none';
+    img.onerror = () => {
+      img.style.display = 'none';
+      document.getElementById('hero-placeholder').style.display = 'flex';
+    };
+  }
+
+  // Biografía (del sheet)
+  if (sheet && sheet.biografia && sheet.biografia.trim()) {
+    document.getElementById('bio-texto').innerHTML = sheet.biografia
+      .split('\n').filter(p => p.trim()).map(p => `<p>${p}</p>`).join('');
+    document.getElementById('seccion-bio').style.display = 'block';
+  }
+
+  // Dato curioso (del sheet)
+  if (sheet && sheet.dato_curioso && sheet.dato_curioso.trim()) {
+    document.getElementById('dato-texto').textContent = sheet.dato_curioso;
+    document.getElementById('seccion-dato').style.display = 'block';
+  }
+
+  // Botones
+  document.getElementById('btn-spinstack').href = `spinstack://release/${id}`;
+  document.getElementById('btn-discogs').href = `https://www.discogs.com/release/${id}`;
+
+  // Canciones
+  if (discogs.tracklist && discogs.tracklist.length > 0) {
+    buildTracklist(discogs.tracklist);
+  } else {
+    document.getElementById('seccion-canciones').style.display = 'none';
+  }
+
+  // Mostrar todo
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+}
+
+// ── MAIN ───────────────────────────────────────────────────────
+async function init() {
+  const id = getReleaseId();
+
+  if (!id) {
+    mostrarError('No se especificó un ID de disco. Verifica que la URL sea correcta.');
+    return;
+  }
+
+  try {
+    // Consultas en paralelo: Discogs API + Google Sheet
+    const [discogsRes, sheetRes] = await Promise.all([
+      fetch(`${DISCOGS_API}${id}`, {
+        headers: { 'User-Agent': USER_AGENT }
+      }),
+      fetch(SHEET_URL)
+    ]);
+
+    if (!discogsRes.ok) {
+      throw new Error(`Discogs respondió con error ${discogsRes.status}`);
+    }
+
+    const discogsData = await discogsRes.json();
+    const sheetText = await sheetRes.text();
+    const sheetRows = parseCSV(sheetText);
+
+    // Buscar el disco en el sheet por release_id
+    const sheetRow = sheetRows.find(r => String(r.release_id).trim() === String(id).trim()) || null;
+
+    renderPagina(discogsData, sheetRow);
+
+  } catch (err) {
+    console.error(err);
+    mostrarError(`No se pudo cargar la información. Verifica tu conexión e intenta de nuevo.\n(${err.message})`);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
