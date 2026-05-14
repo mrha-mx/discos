@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cargando...</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --fondo:       #0d0d0d;
+    --fondo2:      #1a1a1a;
+    --fondo3:      #2a2a2a;
+    --borde:       #333333;
+    --texto:       #f0ebe0;
+    --texto-sub:   #8a8a8a;
+    --acento:      #c9a84c;
+    --acento-soft: rgba(201,168,76,0.10);
+    --acento-brd:  rgba(201,168,76,0.25);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --fondo:       #f5f2ed;
+      --fondo2:      #ffffff;
+      --fondo3:      #ede9e2;
+      --borde:       #ddd8cf;
+      --texto:       #1a1610;
+      --texto-sub:   #7a7068;
+      --acento:      #a07830;
+      --acento-soft: rgba(160,120,48,0.07);
+      --acento-brd:  rgba(160,120,48,0.22);
+    }
+  }
+
+  html { background: var(--fondo); }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+
+  /* ── LOADING ── */
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--fondo);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 100;
+    transition: opacity 0.4s ease;
+  }
+
+  .loading-vinyl {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50%,
+      #222 0%, #222 15%, #1a1a1a 16%, #111 22%,
+      #1a1a1a 23%, #111 30%, #1a1a1a 31%, #111 38%,
+      #1a1a1a 39%, #111 46%, #1a1a1a 47%, #111 50%
+    );
+    animation: spin 2s linear infinite;
+    box-shadow: 0 0 24px rgba(201,168,76,0.2);
+  }
+
+  .loading-texto {
+    font-size: 12px;
+    color: var(--texto-sub);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* ── ERROR ── */
+  .error-screen {
+    display: none;
+    padding: 60px 24px;
+    text-align: center;
+  }
+  .error-titulo { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 10px; }
+  .error-msg { font-size: 13px; color: var(--texto-sub); line-height: 1.6; }
+
+  /* ── CONTENIDO ── */
+  .main-content { display: none; }
+
+  /* ── NAV ── */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 0;
+  }
+
+  .nav-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    color: var(--texto-sub);
+    font-size: 13px;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s;
+  }
+  .nav-back:hover { color: var(--acento); }
+  .nav-back-arrow { font-size: 16px; }
+
+  .logo {
+    height: 24px;
+    width: auto;
+    filter: none;
+    opacity: 0.7;
+  }
+  @media (prefers-color-scheme: dark) {
+    .logo { filter: invert(1) brightness(0.92); }
+  }
+
+  /* ── HEADER ── */
+  .header {
+    padding: 20px 20px 0;
+  }
+
+  .header-seccion {
+    font-size: 11px;
+    color: var(--acento);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .header-titulo {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--texto);
+    margin-bottom: 6px;
+  }
+
+  .header-count {
+    font-size: 12px;
+    color: var(--texto-sub);
+    margin-bottom: 20px;
+  }
+
+  .header-linea {
+    height: 1px;
+    background: linear-gradient(to right, var(--acento), transparent);
+    opacity: 0.35;
+    margin-bottom: 20px;
+  }
+
+  /* ── GRID DE DISCOS ── */
+  .discos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 0 20px 60px;
+  }
+
+  .disco-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeUp 0.3s ease forwards;
+  }
+
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  .disco-cover-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--fondo2);
+    border: 1px solid var(--borde);
+    margin-bottom: 8px;
+  }
+
+  .disco-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.2s ease;
+  }
+
+  .disco-card:hover .disco-cover {
+    transform: scale(1.03);
+  }
+
+  /* Placeholder vinyl cuando no hay portada */
+  .disco-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fondo2);
+  }
+
+  .vinyl-mini {
+    width: 60%;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50%,
+      #111 0%, #111 8%,
+      #1c1c1c 8.5%, #0d0d0d 13%,
+      #1c1c1c 13.5%, #0d0d0d 18%,
+      #1c1c1c 18.5%, #0d0d0d 23%,
+      #1c1c1c 23.5%, #0d0d0d 29%,
+      #1c1c1c 29.5%, #0d0d0d 35%,
+      #1c1c1c 35.5%, #0d0d0d 41%,
+      #1c1c1c 41.5%, #0d0d0d 47%,
+      #1c1c1c 47.5%, #0d0d0d 50%
+    );
+    opacity: 0.4;
+  }
+
+  .disco-titulo {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--texto);
+    line-height: 1.3;
+    margin-bottom: 2px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .disco-artista {
+    font-size: 11px;
+    color: var(--texto-sub);
+    font-weight: 300;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .disco-anio {
+    font-size: 10px;
+    color: var(--acento);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  /* ── PIE ── */
+  .pie {
+    text-align: center;
+    padding: 20px 20px 40px;
+    border-top: 1px solid var(--borde);
+  }
+  .pie-logo {
+    height: 20px;
+    width: auto;
+    opacity: 0.2;
+    filter: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    .pie-logo { filter: invert(1); }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="loading-vinyl"></div>
+  <div class="loading-texto">Cargando discos...</div>
+</div>
+
+<div class="error-screen" id="error">
+  <div class="error-titulo">No se pudo cargar</div>
+  <div class="error-msg" id="error-msg">Intenta recargar la página.</div>
+</div>
+
+<div class="main-content" id="main">
+
+  <div class="nav-bar">
+    <a href="#" class="nav-back" id="nav-back">
+      <span class="nav-back-arrow">‹</span>
+      <span id="nav-back-label">Sección</span>
+    </a>
+    <img src="logo.PNG" alt="Miguel Herrería" class="logo">
+  </div>
+
+  <div class="header">
+    <div class="header-seccion" id="header-seccion"></div>
+    <div class="header-titulo" id="header-titulo"></div>
+    <div class="header-count" id="header-count"></div>
+    <div class="header-linea"></div>
+  </div>
+
+  <div class="discos-grid" id="grid"></div>
+
+  <div class="pie">
+    <img src="logo.PNG" alt="" class="pie-logo">
+  </div>
+
+</div>
+
+<script>
+const SHEET_INDEX = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSgCg_wULbvtaSSgau8IoZuIVGabPO7g73VwV6ftPhhT39MBLEpQ14G518A5IBPPqrndtP40xAjMsgS/pub?gid=2086226810&single=true&output=csv';
+const DISCOGS_API = 'https://api.discogs.com/releases/';
+const DISCOGS_DELAY = 300; // ms entre llamadas
+
+const SECCION_NOMBRES = {
+  'rock':                 'Rock',
+  'pop-internacional':    'Pop Internacional',
+  'cancion-romantica':    'Canción Romántica',
+  'soul-jazz':            'Soul/Jazz/Hip-Hop & Más',
+  'musica-mexicana':      'Música Mexicana',
+  'musica-del-mundo':     'Música del Mundo',
+  'clasica-orquestas':    'Clásica & Orquestas',
+  'ritmos-latinos':       'Ritmos Latinos',
+  'musica-infantil':      'Música Infantil',
+  'bandas-sonoras':       'Bandas Sonoras',
+  'electronica-house':    'Electrónica & House',
+  'experimental-new-age': 'Experimental & New Age'
+};
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  return lines.slice(1).map(line => {
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQuotes = !inQuotes; }
+      else if (line[i] === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
+      else { current += line[i]; }
+    }
+    values.push(current.trim());
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = values[i] || '');
+    return obj;
+  });
+}
+
+function getParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function getCover(releaseId) {
+  try {
+    const r = await fetch(`${DISCOGS_API}${releaseId}`, {
+      headers: { 'User-Agent': 'MiguelHerreriaColeccion/1.0' }
+    });
+    if (!r.ok) return null;
+    const data = await r.json();
+    const imgs = data.images;
+    if (imgs && imgs.length > 0) {
+      const primary = imgs.find(i => i.type === 'primary') || imgs[0];
+      return primary.uri150 || primary.uri || null;
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function cargar() {
+  const seccionId = getParam('seccion');
+  const subParam  = getParam('sub');
+
+  if (!seccionId) { mostrarError('No se especificó sección.'); return; }
+
+  // Nav back
+  document.getElementById('nav-back').href = `seccion.html?id=${seccionId}`;
+  const seccionNombre = SECCION_NOMBRES[seccionId] || seccionId;
+  document.getElementById('nav-back-label').textContent = seccionNombre;
+
+  try {
+    const res = await fetch(SHEET_INDEX);
+    const text = await res.text();
+    const todos = parseCSV(text);
+
+    // Filter by section
+    const seccionExcel = seccionNombre;
+    let discos = todos.filter(d => d.seccion === seccionExcel);
+
+    // Filter by subsection if specified
+    const esTodos = !subParam || subParam === 'todos';
+    if (!esTodos) {
+      discos = discos.filter(d => d.subseccion === subParam);
+    }
+
+    // Header
+    document.title = (esTodos ? seccionNombre : subParam) + ' — Mi Colección';
+    document.getElementById('header-seccion').textContent = seccionNombre;
+    document.getElementById('header-titulo').textContent = esTodos ? 'Todos los discos' : subParam;
+    document.getElementById('header-count').textContent = discos.length + (discos.length === 1 ? ' disco' : ' discos');
+
+    // Show content
+    document.getElementById('loading').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('main').style.display = 'block';
+    }, 400);
+
+    // Render cards
+    const grid = document.getElementById('grid');
+    discos.forEach((disco, i) => {
+      const a = document.createElement('a');
+      a.className = 'disco-card';
+      a.href = `disco.html?id=${disco.release_id}`;
+      a.style.animationDelay = `${i * 30}ms`;
+      a.innerHTML = `
+        <div class="disco-cover-wrap">
+          <div class="disco-placeholder" id="ph-${disco.release_id}">
+            <div class="vinyl-mini"></div>
+          </div>
+          <img class="disco-cover" id="img-${disco.release_id}" src="" alt="${disco.titulo}" style="display:none; position:absolute; inset:0;">
+        </div>
+        <div class="disco-titulo">${disco.titulo}</div>
+        <div class="disco-artista">${disco.artista}</div>
+        ${disco.anio ? `<div class="disco-anio">${disco.anio}</div>` : ''}
+      `;
+      grid.appendChild(a);
+    });
+
+    // Load covers with rate limiting
+    for (const disco of discos) {
+      if (!disco.release_id) continue;
+      const cover = await getCover(disco.release_id);
+      if (cover) {
+        const img = document.getElementById(`img-${disco.release_id}`);
+        const ph  = document.getElementById(`ph-${disco.release_id}`);
+        if (img) {
+          img.src = cover;
+          img.style.display = 'block';
+          img.style.position = 'absolute';
+          img.style.inset = '0';
+          if (ph) ph.style.display = 'none';
+        }
+      }
+      await sleep(DISCOGS_DELAY);
+    }
+
+  } catch(e) {
+    mostrarError('Error al cargar los datos.');
+  }
+}
+
+function mostrarError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('error-msg').textContent = msg;
+  document.getElementById('error').style.display = 'block';
+}
+
+cargar();
+</script>
+</body>
+</html>
