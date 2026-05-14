@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Colección — Miguel Herrería</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --fondo:       #0d0d0d;
+    --fondo2:      #1a1a1a;
+    --fondo3:      #2a2a2a;
+    --borde:       #333333;
+    --texto:       #f0ebe0;
+    --texto-sub:   #8a8a8a;
+    --acento:      #c9a84c;
+    --acento-soft: rgba(201,168,76,0.10);
+    --acento-brd:  rgba(201,168,76,0.25);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --fondo:       #f5f2ed;
+      --fondo2:      #ffffff;
+      --fondo3:      #ede9e2;
+      --borde:       #ddd8cf;
+      --texto:       #1a1610;
+      --texto-sub:   #7a7068;
+      --acento:      #a07830;
+      --acento-soft: rgba(160,120,48,0.07);
+      --acento-brd:  rgba(160,120,48,0.22);
+    }
+  }
+
+  html { background: var(--fondo); }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+
+  /* ── LOADING ── */
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--fondo);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 100;
+    transition: opacity 0.4s ease;
+  }
+
+  .loading-vinyl {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50%,
+      #222 0%, #222 15%,
+      #1a1a1a 16%, #111 22%,
+      #1a1a1a 23%, #111 30%,
+      #1a1a1a 31%, #111 38%,
+      #1a1a1a 39%, #111 46%,
+      #1a1a1a 47%, #111 50%
+    );
+    animation: spin 2s linear infinite;
+    box-shadow: 0 0 24px rgba(201,168,76,0.2);
+  }
+
+  .loading-texto {
+    font-size: 12px;
+    color: var(--texto-sub);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* ── HEADER ── */
+  .header {
+    display: none;
+    padding: 24px 20px 0;
+    position: relative;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .logo {
+    height: 32px;
+    width: auto;
+    display: block;
+    filter: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .logo { filter: invert(1) brightness(0.92); }
+  }
+
+  .header-disco-count {
+    font-size: 11px;
+    color: var(--texto-sub);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .header-titulo {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--texto);
+    margin-bottom: 6px;
+  }
+
+  .header-subtitulo {
+    font-size: 13px;
+    color: var(--texto-sub);
+    font-weight: 300;
+    margin-bottom: 28px;
+  }
+
+  .header-linea {
+    height: 1px;
+    background: var(--borde);
+    margin: 0 -20px;
+  }
+
+  /* ── LISTA DE SECCIONES ── */
+  .secciones-lista {
+    display: none;
+    padding: 0 0 60px;
+  }
+
+  .seccion-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--borde);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s ease;
+    cursor: pointer;
+    gap: 12px;
+  }
+
+  .seccion-item:hover {
+    background: var(--acento-soft);
+  }
+
+  .seccion-item:active {
+    background: var(--acento-soft);
+  }
+
+  .seccion-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .seccion-nombre {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--texto);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .seccion-subsecciones {
+    font-size: 11px;
+    color: var(--texto-sub);
+    font-weight: 300;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .seccion-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .seccion-count {
+    font-size: 12px;
+    color: var(--acento);
+    font-weight: 500;
+    min-width: 28px;
+    text-align: right;
+  }
+
+  .seccion-arrow {
+    color: var(--texto-sub);
+    font-size: 14px;
+    line-height: 1;
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+
+  .seccion-item:hover .seccion-arrow {
+    transform: translateX(3px);
+    color: var(--acento);
+  }
+
+  /* ── ERROR ── */
+  .error-screen {
+    display: none;
+    padding: 60px 24px;
+    text-align: center;
+  }
+  .error-titulo {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  .error-msg { font-size: 13px; color: var(--texto-sub); line-height: 1.6; }
+
+  /* ── ENTRADA ANIMADA ── */
+  .seccion-item {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeUp 0.3s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="loading-vinyl"></div>
+  <div class="loading-texto">Cargando colección</div>
+</div>
+
+<div class="error-screen" id="error">
+  <div class="error-titulo">No se pudo cargar</div>
+  <div class="error-msg">Intenta recargar la página.</div>
+</div>
+
+<div class="header" id="header">
+  <div class="header-top">
+    <img src="logo.PNG" alt="Miguel Herrería" class="logo">
+    <span class="header-disco-count" id="total-discos">— discos</span>
+  </div>
+  <div class="header-titulo">Mi Colección</div>
+  <div class="header-subtitulo">Vinilos · Ciudad de México</div>
+  <div class="header-linea"></div>
+</div>
+
+<div class="secciones-lista" id="lista"></div>
+
+<script>
+const SHEET_SECCIONES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSgCg_wULbvtaSSgau8IoZuIVGabPO7g73VwV6ftPhhT39MBLEpQ14G518A5IBPPqrndtP40xAjMsgS/pub?gid=2056673892&single=true&output=csv';
+const SHEET_DISCOS    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSgCg_wULbvtaSSgau8IoZuIVGabPO7g73VwV6ftPhhT39MBLEpQ14G518A5IBPPqrndtP40xAjMsgS/pub?gid=1073519162&single=true&output=csv';
+
+// Mapa de subsecciones por seccion_id
+const SUBSECCIONES = {
+  'rock':               'Classic · Alternative & Indie · Progresivo · Rock en Español',
+  'pop-internacional':  'Pop en Inglés · Pop en Español · Luis Miguel · Julio Iglesias',
+  'cancion-romantica':  'Boleros & Tríos · José José',
+  'soul-jazz':          '',
+  'musica-mexicana':    'Natalia Lafourcade',
+  'musica-del-mundo':   '',
+  'clasica-orquestas':  '',
+  'ritmos-latinos':     'Salsa · Urbano & Reggaetón',
+  'musica-infantil':    '',
+  'bandas-sonoras':     '',
+  'electronica-house':  '',
+  'experimental-new-age': ''
+};
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  return lines.slice(1).map(line => {
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') {
+        inQuotes = !inQuotes;
+      } else if (line[i] === ',' && !inQuotes) {
+        values.push(current.trim());
+        current = '';
+      } else {
+        current += line[i];
+      }
+    }
+    values.push(current.trim());
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = values[i] || '');
+    return obj;
+  });
+}
+
+async function cargar() {
+  try {
+    const [resSec, resDis] = await Promise.all([
+      fetch(SHEET_SECCIONES),
+      fetch(SHEET_DISCOS)
+    ]);
+    const [textSec, textDis] = await Promise.all([resSec.text(), resDis.text()]);
+    const secciones = parseCSV(textSec);
+    const discos    = parseCSV(textDis);
+
+    // Contar discos por sección
+    const conteo = {};
+    discos.forEach(d => {
+      const sec = (d['Sección'] || '').trim();
+      if (sec) conteo[sec] = (conteo[sec] || 0) + 1;
+    });
+
+    // Mapa nombre → seccion_id
+    const idPorNombre = {};
+    secciones.forEach(s => idPorNombre[s.nombre] = s.seccion_id);
+
+    // Total
+    document.getElementById('total-discos').textContent = discos.length + ' discos';
+
+    // Orden de secciones según hoja
+    const lista = document.getElementById('lista');
+    secciones.forEach((sec, i) => {
+      const id   = sec.seccion_id;
+      const nombre = sec.nombre;
+      const count  = conteo[nombre] || 0;
+      const subs   = SUBSECCIONES[id] || '';
+
+      const a = document.createElement('a');
+      a.className = 'seccion-item';
+      a.href = `seccion.html?id=${id}`;
+      a.style.animationDelay = `${i * 40}ms`;
+      a.innerHTML = `
+        <div class="seccion-info">
+          <div class="seccion-nombre">${nombre}</div>
+          ${subs ? `<div class="seccion-subsecciones">${subs}</div>` : ''}
+        </div>
+        <div class="seccion-meta">
+          <span class="seccion-count">${count}</span>
+          <span class="seccion-arrow">›</span>
+        </div>
+      `;
+      lista.appendChild(a);
+    });
+
+    // Mostrar
+    document.getElementById('loading').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('header').style.display = 'block';
+      document.getElementById('lista').style.display = 'block';
+    }, 400);
+
+  } catch (e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'block';
+  }
+}
+
+cargar();
+</script>
+</body>
+</html>
